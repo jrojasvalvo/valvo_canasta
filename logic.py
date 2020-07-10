@@ -47,8 +47,9 @@ class Card:
 
 
 class Player:
-    def __init__(self, hand):
+    def __init__(self, hand, team_num):
         self.hand = hand
+        self.team_num = team_num
 
 class Team:
     def __init__(self, members, cards_played, red_threes, canastas, naturals, score):
@@ -58,6 +59,19 @@ class Team:
         self.red_threes = red_threes
         self.canastas = canastas
         self.naturals = naturals
+        self.table = [ [], #Red threes (0)
+                       [], #Black threes (1) (Only playable when going out)
+                       [], #Fours (2)
+                       [], #Fives (3)
+                       [], #Sixes (4)
+                       [], #Sevens (5)
+                       [], #Eights (6)
+                       [], #Nines (7)
+                       [], #Tens (8)
+                       [], #Jacks (9)
+                       [], #Queens (10)
+                       [], #Kings (11)
+                       [] ] #Aces (12)
 
     def count_points(self):
         for c in self.cards_played:
@@ -136,6 +150,16 @@ def take_turn(player, player_turn, pile, deck, team):
     ##############################################
 
     while(done == "no"):
+        selection = input("Select a card to play")
+        in_hand = false
+
+        for c in player.hand:
+            if(c.rank == selection):
+                in_hand = true
+        if(in_hand == false):
+            print("Invalid selection")
+
+
         done = input("Are you done?")
     
 
@@ -156,20 +180,17 @@ def play_game():
 
     #Initializing players, teams, and deck
     num_players = int(input("How many players? (2, 4, or 6): "))
-    players = []
-    for i in range(0, num_players):
-        players.append(Player([]))
     teams = []
     for i in range(0, 2):
-        if(num_players == 2):
-            teams.append(Team([players[0]], [], 0, 0, 0, 0))
-            teams.append(Team([players[1]], [], 0, 0, 0, 0))
+        if(num_players >= 2):
+            teams.append(Team([Player([], 0)], [], 0, 0, 0, 0))
+            teams.append(Team([Player([], 1)], [], 0, 0, 0, 0))
         elif(num_players == 4):
-            teams.append(Team([players[0], players[2]], [], 0, 0, 0, 0))
-            teams.append(Team([players[1], players[3]], [], 0, 0, 0, 0))
+            teams.append(Team([Player([], 0), Player([], 0)], [], 0, 0, 0, 0))
+            teams.append(Team([Player([], 1), Player([], 1)], [], 0, 0, 0, 0))
         elif(num_players == 6):
-            teams.append(Team([players[0], players[2], players[4]], [], 0, 0, 0, 0))
-            teams.append(Team([players[1], players[3], players[5]], [], 0, 0, 0, 0))
+            teams.append(Team([Player([], 0), Player([], 0), Player([], 0)], [], 0, 0, 0, 0))
+            teams.append(Team([Player([], 1), Player([], 1), Player([], 1)], [], 0, 0, 0, 0))
     deck = init_deck()
     pile = []
 
@@ -184,7 +205,7 @@ def play_game():
             team_num = 0
         else:
             team_num = 1
-        take_turn(players[player_turn], player_turn, pile, deck, teams[team_num])
+        take_turn(teams[team_num].members[player_turn // 2], player_turn, pile, deck, teams[team_num])
         player_turn += 1
         if(player_turn > num_players - 1):
             player_turn = 0
